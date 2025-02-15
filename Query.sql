@@ -36,13 +36,6 @@ WITH
         FROM Commodities AS c
         WHERE (SELECT MIN(p.[Date]) FROM Stock AS p) <= c.[Date] 
     ),
-    DividendValues AS (
-        SELECT DISTINCT 
-            [Dividend], 
-            (SELECT MIN(p.[Date]) FROM Stock AS p WHERE p.[Date] >= d.[Date]) AS tradingDay
-        FROM Dividends AS d
-        WHERE (SELECT MIN(p.[Date]) FROM Stock AS p) <= d.[Date] 
-    ),
     FedRate AS (
         SELECT DISTINCT 
             [Fed_Rate], 
@@ -79,13 +72,6 @@ WITH
         FROM QuarterlyEarnings AS q
         WHERE (SELECT MIN(p.[Date]) FROM Stock AS p) <= q.[Date] 
     ),
-    Splits AS (
-        SELECT DISTINCT 
-            [split_factor], 
-            (SELECT MIN(p.[Date]) FROM Stock AS p WHERE p.[Date] >= s.[Date]) AS tradingDay
-        FROM Split AS s
-        WHERE (SELECT MIN(p.[Date]) FROM Stock AS p) <= s.[Date] 
-    ),
     Unemployments AS (
         SELECT DISTINCT 
             [UnemploymentRate], 
@@ -99,7 +85,6 @@ SELECT
     ae.[AnnualEarnings],
     os.[overallScore],
     c.[Commodities_Index],
-    d.[Dividend],
     f.[Fed_Rate],
     iv.[Inflation],
     sp.[SectorOpen],
@@ -112,17 +97,14 @@ SELECT
     q.[QuarterSurprise],
     q.[QuarterSurprisePercentage],
     q.[QuarterReportTime],
-    s.[split_factor],
     u.[UnemploymentRate]
 FROM Stock AS p
 LEFT JOIN aEarnings AS ae ON p.[Date] = ae.[tradingDay] 
 LEFT JOIN oSentiment AS os ON p.[Date] = os.[tradingDay]
 LEFT JOIN Commodity AS c ON p.[Date] = c.[tradingDay]
-LEFT JOIN DividendValues AS d ON p.[Date] = d.[tradingDay]
 LEFT JOIN FedRate AS f ON p.[Date] = f.[Date]
 LEFT JOIN inflationValue AS iv ON p.[Date] = iv.[tradingDay]
 LEFT JOIN sectorPerformance AS sp ON p.[Date] = sp.[tradingDay]
 LEFT JOIN QuaterEarnings AS q ON p.[Date] = q.[tradingDay]
-LEFT JOIN Splits AS s ON p.[Date] = s.[tradingDay]
 LEFT JOIN Unemployments AS u ON p.[Date] = u.[tradingDay]
 ORDER BY p.[Date];
